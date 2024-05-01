@@ -12,26 +12,20 @@ public class GameController {
 
     public static Game startGame(Integer dimension, List<Player> players, List<WinningStragtery> winningStragteryList){
 
-        // validation
-//        return new Game(dimension,players, winningStragteryList);
-
         return  Game.createGameBuilderInstance()
                 .setGameBuilderBoard(dimension)
                 .setPlayers(players)
                 .setWinningStragteries(winningStragteryList)
                 .build();
     }
-//    public void startGame(Game game){
-//
-//    }
 
     public void drawMatrix(Game game){
         game.drawMatrix(game);
     }
 
-    public void makeMove(Game game){
+    public void makeMove(Game game, Scanner sc){
 
-        game.makeMove(game);
+        game.makeMove(game, sc);
 
     }
 

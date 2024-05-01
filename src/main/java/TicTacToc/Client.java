@@ -42,11 +42,10 @@ class  Client{
         Set<Character> symbolsSet =  new HashSet<>();
 
         while(true) {
-            System.out.print("To continue press ENTER to stop write 'stop' ");
+            System.out.print("To continue selecting players press ENTER to START the game enter 'start' ");
             String input = sc.nextLine();
 
-            if(input.equals("stop")){
-                sc.close();
+            if(input.equals("start")){
                break;
             }
 
@@ -106,33 +105,59 @@ class  Client{
 
         }
 
-        sc.close();
+        List<WinningStragtery> winningStrategy = new ArrayList<>();
+
+        HashMap<String, WinningStragtery> strategies = new HashMap<>();
+        strategies.put("row", new RowWiseWinStragteries());
+        strategies.put("col", new ColumnWiseWinStragtery());
+        strategies.put("diagonal", new DiagonalWiseWinStragtery());
 
 
-//        List<Player> players = new ArrayList<>();
-//        players.add( new Player(123, "Aniket", new Symbol('#',"#fff"), PlayerType.HUMAN) );
-//        players.add(new Player(124, "Tejas", new Symbol('O',"#FFA500"), PlayerType.BOT ));
-//
-//
+        System.out.println("Please select winning strategy, it can be single or multiple ");
+        System.out.println("Menu are as follow 1: row , 2:col, 3: diagonal , 4:all , 5:stop ");
+
+        while (true){
+            System.out.println("Please enter strategy to continue and 'stop' to STOP ");
+            String step = sc.nextLine();
+            step = step.toLowerCase();
+            if(step.equals("stop")){
+              break;
+            }
+
+            if (step.equals("all")){
+                strategies.forEach( (key,value)-> winningStrategy.add((value)) );
+                break;
+            }
+
+            winningStrategy.add(strategies.get(step));
+        }
+
+
         GameController gameController =  new GameController();
 
-        List<WinningStragtery> winningStragteries = new ArrayList<>();
-        winningStragteries.add( new RowWiseWinStragteries());
-        winningStragteries.add( new ColumnWiseWinStragtery());
-        winningStragteries.add( new DiagonalWiseWinStragtery());
+        Game game = GameController.startGame(gridSize,players, winningStrategy);
 
-        Game game = GameController.startGame(3,players, winningStragteries);
 
         while (gameController.getGameState(game).equals(GameState.INPROGRESS)){
             gameController.drawMatrix(game);
-            gameController.makeMove(game);
+            try {
+               gameController.makeMove(game, sc);
+
+            }
+            catch (RuntimeException e){
+                System.out.println(e.getMessage());
+            }
         }
-//
+
+        gameController.drawMatrix(game);
+
         if (gameController.getGameState(game).equals(GameState.DRAW)){
             System.out.println("Game is Draw");
         } else if (gameController.getGameState(game).equals(GameState.COMPLETED)) {
-            System.out.println("Winner of the Game is ");
+            System.out.println("Winner of the Game is"+game.getPlayingPlayer().getName() );
         }
+
+
 
 
     }

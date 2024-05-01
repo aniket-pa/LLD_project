@@ -16,6 +16,7 @@ public class Cell {
         this.cellState = CellState.EMPTY;
     }
 
+
     public Integer getRow() {
         return row;
     }

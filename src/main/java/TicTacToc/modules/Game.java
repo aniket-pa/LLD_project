@@ -1,5 +1,7 @@
 package TicTacToc.modules;
 
+import TicTacToc.Stratgery.ColumnWiseWinStragtery;
+import TicTacToc.Stratgery.DiagonalWiseWinStragtery;
 import TicTacToc.Stratgery.RowWiseWinStragteries;
 import TicTacToc.Stratgery.WinningStragtery;
 
@@ -28,7 +30,8 @@ public class Game{
         this.winningStragteries =  winningStragteryList;
         this.nextPlayerId = 0;
         this.gameState = GameState.INPROGRESS;
-        this.moves = null;
+        this.moves = new ArrayList<Move>();
+        this.winner = null;
     }
 
 
@@ -173,28 +176,81 @@ public class Game{
 
     public  Player getPlayingPlayer(){
 
-        for (Player player : players){
-            if (player.getId().equals(this.nextPlayerId)){
-                return player;
+        return  this.getPlayers().get(this.nextPlayerId);
+
+    }
+
+    public List<WinningStragtery> getWinningStragteries() {
+        return winningStragteries;
+    }
+
+    public void setWinningStragteries(List<WinningStragtery> winningStragteries) {
+        this.winningStragteries = winningStragteries;
+    }
+
+    public Data validationInput(Player playingPlayer, Scanner sc){
+
+        System.out.println("Hi "+playingPlayer.name+" It's your turn, Your selected symbol is "+ playingPlayer.getSymbol().getSymbol()+" Please enter the row number ");
+        int rowNum = sc.nextInt();
+        sc.nextLine();
+
+        System.out.println("Please enter the column number");
+        int colNum = sc.nextInt();
+
+        int gridSize = this.board.getSize();
+        if(colNum >= gridSize & rowNum >= gridSize ){
+            throw new RuntimeException("Row and column values should be less than grid dimension");
+        }
+
+        return new Data(rowNum,colNum);
+
+    }
+
+    public  void   makeMove(Game game , Scanner sc){
+
+        Player playingPlayer = getPlayingPlayer();
+        List<WinningStragtery> winningStragteryList = game.getWinningStragteries();
+
+        Data data =  game.validationInput(playingPlayer,sc);
+
+        game.board.makeMove(data.row,data.col,playingPlayer);
+
+        for (WinningStragtery stragtey : winningStragteryList)
+        {
+            stragtey.win(game,data.row,data.col,playingPlayer);
+
+        }
+//        WinningStragtery rowWise = new RowWiseWinStragteries();
+//        WinningStragtery columnWIse = new ColumnWiseWinStragtery();
+//        WinningStragtery diagonalWIse =  new DiagonalWiseWinStragtery();
+
+        // check winning value for row
+//        rowWise.win(game,rowNum,colNum,playingPlayer);
+//        columnWIse.win(game,rowNum,colNum,playingPlayer);
+//        diagonalWIse.win(game,rowNum,colNum,playingPlayer);
+
+
+        Cell cellValue = game.getBoard().getGrid().get(data.row).get(data.col);
+
+        List<Move> moves = game.getMoves();
+        moves.add(new Move(cellValue,playingPlayer));
+        game.setMoves(moves);
+
+        if (moves.size() == game.board.getSize()*game.board.getSize()){
+            if (game.getWinner() == null){
+                game.setGameState(GameState.DRAW);
+            }
+            else {
+                game.setGameState(GameState.COMPLETED);
             }
         }
 
-        return null;
-    }
-
-    public  void  makeMove(Game game){
-        Player playingPlayer = getPlayingPlayer();
-
-        Scanner sc = new Scanner(System.in);
-        System.out.println("Please enter the next Move");
-        System.out.println("Please enter the row number");
-        Integer rowNum = sc.nextInt();
-        System.out.println("Please enter the column number");
-        Integer colNum = sc.nextInt();
-
-        WinningStragtery rowWise = new RowWiseWinStragteries();
-
-
+        if (game.gameState.equals(GameState.INPROGRESS)){
+            if(game.getNextPlayerId().equals(game.getPlayers().size()-1) ){
+                game.setNextPlayerId(0);
+            }
+            else { game.setNextPlayerId(game.getNextPlayerId() + 1 );}
+        }
 
     }
 }
